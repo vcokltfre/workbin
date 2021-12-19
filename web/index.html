@@ -31,7 +31,7 @@
         fetch(`https://paste.nextcord.dev/api/item?key=${id}`)
           .then(res => res.text())
           .then(data => {
-            editor.setValue(data.code);
+            editor.session.setValue(data.code);
           });
         editor.setReadOnly(true);
         document.getElementById("savebutton").style.display = "none";

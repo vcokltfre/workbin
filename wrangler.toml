@@ -5,7 +5,7 @@ account_id = "c8526a45c47706d6c69f8d997004bd7a"
 route = "paste.nextcord.dev/*"
 compatibility_date = "2021-12-19"
 kv_namespaces = [
-    { binding = "PASTES", id = "a20fc5453a25469282397e99003e2f9b", preview_id = "a20fc5453a25469282397e99003e2f9b" },
+    { binding = "WORKBIN", id = "a20fc5453a25469282397e99003e2f9b", preview_id = "a20fc5453a25469282397e99003e2f9b" },
 ]
 
 [build]
