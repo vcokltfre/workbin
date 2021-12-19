@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet" />
+    <title>Workbin</title>
+  </head>
+  <body>
+    <div class="nav">
+      <span>Workbin</span>
+      <div class="fill"></div>
+      <button id="savebutton" onclick="save()">Save</button>
+    </div>
+    <div id="editor"></div>
+
+    <script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script>
+      var editor = ace.edit("editor");
+      editor.setTheme("ace/theme/chaos");
+      editor.session.setMode("ace/mode/python");
+      editor.setShowPrintMargin(false);
+
+      const url = new URL(window.location.href);
+      const id = url.searchParams.get("id");
+
+      if (id) {
+        fetch(`https://paste.nextcord.dev/api/item?key=${id}`)
+          .then(res => res.text())
+          .then(data => {
+            editor.setValue(data.code);
+          });
+        editor.setReadOnly(true);
+        document.getElementById("savebutton").style.display = "none";
+      }
+
+      function save() {
+        const val = editor.getValue();
+
+        fetch("https://paste.nextcord.dev/api/new", {
+          method: "POST",
+          body: val,
+        }).then(res =>
+          res.json().then(data => {
+            const key = data.key;
+            window.location.href = `https://paste.nextcord.dev?id=${key}`;
+          }),
+        );
+      }
+    </script>
+  </body>
+
+  <style type="text/css" media="screen">
+    body {
+      margin: 0;
+    }
+
+    .nav {
+      height: 2rem;
+      background: #161616;
+      margin: none;
+      color: #f6f6f6;
+      font-family: "Open Sans", sans-serif;
+      display: flex;
+      align-items: center;
+      flex-direction: row;
+
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+
+    .nav .fill {
+      width: 100%;
+    }
+
+    .nav button {
+      background: #5c5c5c;
+      border-style: none;
+      border-radius: 0.25rem;
+      color: #f6f6f6;
+    }
+
+    #editor {
+      position: absolute;
+      top: 2rem;
+      right: 0;
+      bottom: 0;
+      left: 0;
+    }
+  </style>
+</html>
