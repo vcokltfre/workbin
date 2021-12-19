@@ -13,6 +13,8 @@
     <div class="nav">
       <span>Workbin</span>
       <div class="fill"></div>
+      <button onclick="window.location.href = '/'">New</button>
+      <div class="sep"></div>
       <button id="savebutton" onclick="save()">Save</button>
     </div>
     <div id="editor"></div>
@@ -99,6 +101,10 @@
       border-style: none;
       border-radius: 0.25rem;
       color: #f6f6f6;
+    }
+
+    .nav .sep {
+      width: 0.5rem;
     }
 
     #editor {
