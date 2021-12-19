@@ -30,14 +30,14 @@
       let canSave = true;
 
       if (id) {
+        canSave = false;
         fetch(`https://paste.nextcord.dev/api/item?key=${id}`)
           .then(res => res.text())
           .then(data => {
             editor.session.setValue(data.code);
+            editor.setReadOnly(true);
+            document.getElementById("savebutton").style.display = "none";
           });
-        editor.setReadOnly(true);
-        document.getElementById("savebutton").style.display = "none";
-        canSave = false;
       }
 
       document.addEventListener(
