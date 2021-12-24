@@ -30,7 +30,7 @@
     <script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
     <script>
       var editor = ace.edit("editor");
-      editor.setTheme("ace/theme/chaos");
+      editor.setTheme("ace/theme/one_dark");
       editor.session.setMode("ace/mode/python");
       editor.setShowPrintMargin(false);
 
@@ -85,7 +85,9 @@
         }).then(res =>
           res.json().then(data => {
             const key = data.key;
-            window.location.href = `https://paste.nextcord.dev?id=${key}`;
+            window.location.href = `https://paste.nextcord.dev?id=${key}&language=${
+              document.getElementById("language").value
+            }`;
           }),
         );
       }
