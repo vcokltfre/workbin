@@ -47,7 +47,7 @@
 
       if (id) {
         canSave = false;
-        fetch(`https://paste.nextcord.dev/api/item?key=${id}`)
+        fetch(`/api/item?key=${id}`)
           .then(res => res.text())
           .then(data => {
             editor.session.setValue(data);
@@ -79,15 +79,13 @@
 
         const val = editor.getValue();
 
-        fetch("https://paste.nextcord.dev/api/new", {
+        fetch("/api/new", {
           method: "POST",
           body: val,
         }).then(res =>
           res.json().then(data => {
             const key = data.key;
-            window.location.href = `https://paste.nextcord.dev?id=${key}&language=${
-              document.getElementById("language").value
-            }`;
+            window.location.href = `/?id=${key}&language=${document.getElementById("language").value}`;
           }),
         );
       }
