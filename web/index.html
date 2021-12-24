@@ -36,6 +36,12 @@
 
       const url = new URL(window.location.href);
       const id = url.searchParams.get("id");
+      const language = url.searchParams.get("language");
+
+      if (language) {
+        document.getElementById("language").value = language;
+        setLanguage();
+      }
 
       let canSave = true;
 
