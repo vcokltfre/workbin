@@ -13,6 +13,14 @@
     <div class="nav">
       <span>Workbin</span>
       <div class="fill"></div>
+      <select name="language" id="language" onchange="setLanguage()">
+        <option value="python">Python</option>
+        <option value="javascript">JavaScript</option>
+        <option value="markdown">Markdown</option>
+        <option value="sql">SQL</option>
+        <option value="text">Plaintext</option>
+      </select>
+      <div class="sep"></div>
       <button onclick="window.location.href = '/'">New</button>
       <div class="sep"></div>
       <button id="savebutton" onclick="save()">Save</button>
@@ -52,6 +60,11 @@
         },
         false,
       );
+
+      function setLanguage() {
+        const elem = document.getElementById("language");
+        editor.session.setMode("ace/mode/" + elem.value);
+      }
 
       function save() {
         if (!canSave) {
@@ -96,7 +109,8 @@
       width: 100%;
     }
 
-    .nav button {
+    .nav button,
+    .nav select {
       background: #5c5c5c;
       border-style: none;
       border-radius: 0.25rem;
