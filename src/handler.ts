@@ -1,3 +1,5 @@
+const TOKEN_REGEX = /([a-zA-Z0-9_-]{23,28})\.([a-zA-Z0-9_-]{6,7})\.([a-zA-Z0-9_-]{27})/g;
+
 async function createResponse(data: string): Promise<Response> {
   return new Response(data, {
     headers: {
@@ -29,7 +31,7 @@ async function getPaste(request: Request): Promise<Response> {
 }
 
 async function createPaste(request: Request): Promise<Response> {
-  const data = await request.text();
+  const data = (await request.text()).replace(TOKEN_REGEX, "[TOKEN REMOVED BY WORKBIN]");
 
   const key = `${Date.now()}${Math.round(Math.random() * 1000)}`;
 
