@@ -94,7 +94,7 @@
 
       function setLanguage() {
         const elem = document.getElementById("language");
-        editor.session.setMode("ace/mode/" + elem.value);
+        primaryEditor.session.setMode("ace/mode/" + elem.value);
       }
 
       function save() {
@@ -102,7 +102,7 @@
           return;
         }
 
-        const val = editor.getValue();
+        const val = primaryEditor.getValue();
 
         fetch("/api/new", {
           method: "POST",
