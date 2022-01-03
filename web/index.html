@@ -25,36 +25,61 @@
       <div class="sep"></div>
       <button id="savebutton" onclick="save()">Save</button>
     </div>
-    <div id="editor"></div>
+    <div class="editors">
+      <div id="editor" class="primaryEditor"></div>
+      <div id="viewEditor" class="viewEditor nv"></div>
+    </div>
 
     <script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
     <script>
-      var editor = ace.edit("editor");
-      editor.setTheme("ace/theme/one_dark");
-      editor.session.setMode("ace/mode/python");
-      editor.setShowPrintMargin(false);
-
-      const url = new URL(window.location.href);
-      const id = url.searchParams.get("id");
-      const language = url.searchParams.get("language");
-
-      if (language) {
-        document.getElementById("language").value = language;
-        setLanguage();
+      function createEditor(elemId) {
+        var editor = ace.edit(elemId);
+        editor.setTheme("ace/theme/one_dark");
+        editor.session.setMode("ace/mode/python");
+        editor.setShowPrintMargin(false);
+        return editor;
       }
 
-      let canSave = true;
+      function setDualDisplay() {
+        const primary = document.getElementById("editor");
+        const view = document.getElementById("viewEditor");
 
-      if (id) {
-        canSave = false;
-        fetch(`/api/item?key=${id}`)
-          .then(res => res.text())
-          .then(data => {
-            editor.session.setValue(data);
-            editor.setReadOnly(true);
-            document.getElementById("savebutton").style.display = "none";
-          });
+        primary.classList.add("hw");
+        view.classList.remove("nv");
       }
+
+      function setEditorValue(editor, value, readonly) {
+        editor.session.setValue(value);
+        editor.setReadOnly(readonly);
+      }
+
+      function setupPage() {
+        const url = new URL(window.location.href);
+        const id = url.searchParams.get("id");
+        const language = url.searchParams.get("language");
+
+        if (language) {
+          document.getElementById("language").value = language;
+          setLanguage();
+        }
+
+        let canSave = true;
+
+        if (id) {
+          canSave = false;
+          fetch(`/api/item?key=${id}`)
+            .then(res => res.text())
+            .then(data => {
+              setEditorValue(primaryEditor, data, true);
+              document.getElementById("savebutton").style.display = "none";
+            });
+        }
+      }
+
+      const primaryEditor = createEditor("editor");
+      const viewEditor = createEditor("viewEditor");
+
+      setupPage();
 
       document.addEventListener(
         "keydown",
@@ -110,7 +135,7 @@
       padding-left: 1rem;
       padding-right: 1rem;
 
-      border-bottom: 0.25rem solid #282c34;
+      border-bottom: 0.25rem solid #575e6b;
     }
 
     .nav .fill {
@@ -129,12 +154,30 @@
       width: 0.5rem;
     }
 
-    #editor {
+    .primaryEditor {
       position: absolute;
       top: 2.25rem;
       right: 0;
       bottom: 0;
       left: 0;
+    }
+
+    .hw {
+      width: 50%;
+    }
+
+    .viewEditor {
+      position: absolute;
+      top: 2.25rem;
+      right: 50%;
+      bottom: 0;
+      left: 50%;
+      width: calc(50% - 0.25rem);
+      border-left: 0.25rem solid #575e6b;
+    }
+
+    .nv {
+      display: none;
     }
   </style>
 </html>
