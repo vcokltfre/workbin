@@ -32,6 +32,8 @@
 
     <script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
     <script>
+      window.canSave = true;
+
       function createEditor(elemId) {
         var editor = ace.edit(elemId);
         editor.setTheme("ace/theme/one_dark");
@@ -63,10 +65,8 @@
           setLanguage();
         }
 
-        let canSave = true;
-
         if (id) {
-          canSave = false;
+          window.canSave = false;
           fetch(`/api/item?key=${id}`)
             .then(res => res.text())
             .then(data => {
@@ -98,7 +98,7 @@
       }
 
       function save() {
-        if (!canSave) {
+        if (!window.canSave) {
           return;
         }
 
