@@ -17,6 +17,8 @@
       src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.2/marked.min.js"
       referrerpolicy="no-referrer"
     ></script>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.4.0/styles/atom-one-dark.min.css" />
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.4.0/highlight.min.js"></script>
     <title>Workbin</title>
   </head>
   <body>
@@ -259,10 +261,17 @@
                 setEditorValue(primaryEditor, data, true);
                 document.getElementById("savebutton").style.display = "none";
               } else {
-                const md = marked.parse(data);
+                const md = marked.parse(`
+\`\`\`py
+print("hello!")
+\`\`\`
+
+https://test.dev
+                `);
                 const el = document.getElementById("editors");
                 el.classList.add("mdv");
                 el.innerHTML = DOMPurify.sanitize(md);
+                hljs.highlightAll();
               }
             });
         }
@@ -385,6 +394,10 @@
       padding-right: 20%;
       color: #f6f6f6;
       font-family: "Open Sans", sans-serif;
+    }
+
+    .mdv a {
+      text-decoration: none;
     }
   </style>
 </html>
