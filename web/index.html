@@ -7,6 +7,16 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet" />
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.3.4/purify.min.js"
+      integrity="sha512-jGh38w63cHRzfBHtyKgEMMkJswUFXDA3YXrDjaE8ptzxV5DDkLDUDjtGUy5tmDkOXHWsItKfFjocaEtj1WuVnQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.2/marked.min.js"
+      referrerpolicy="no-referrer"
+    ></script>
     <title>Workbin</title>
   </head>
   <body>
@@ -195,7 +205,7 @@
       <div class="sep"></div>
       <button id="savebutton" onclick="save()">Save</button>
     </div>
-    <div class="editors">
+    <div class="editors" id="editors">
       <div id="editor" class="primaryEditor"></div>
       <div id="viewEditor" class="viewEditor nv"></div>
     </div>
@@ -233,6 +243,7 @@
         const id = url.searchParams.get("id");
         const language = url.searchParams.get("language");
         const compare = url.searchParams.get("compare");
+        const mdViewer = url.searchParams.get("md");
 
         if (language) {
           document.getElementById("language").value = language;
@@ -244,12 +255,19 @@
           fetch(`/api/item?key=${id}`)
             .then(res => res.text())
             .then(data => {
-              setEditorValue(primaryEditor, data, true);
-              document.getElementById("savebutton").style.display = "none";
+              if (!mdViewer) {
+                setEditorValue(primaryEditor, data, true);
+                document.getElementById("savebutton").style.display = "none";
+              } else {
+                const md = marked.parse(data);
+                const el = document.getElementById("editors");
+                el.classList.add("mdv");
+                el.innerHTML = DOMPurify.sanitize(md);
+              }
             });
         }
 
-        if (compare) {
+        if (compare && !mdViewer) {
           fetch(`/api/item?key=${compare}`)
             .then(res => res.text())
             .then(data => {
@@ -298,8 +316,10 @@
   </body>
 
   <style type="text/css" media="screen">
-    body {
+    body,
+    html {
       margin: 0;
+      background-color: #282c34;
     }
 
     .nav {
@@ -358,6 +378,13 @@
 
     .nv {
       display: none;
+    }
+
+    .mdv {
+      padding-left: 20%;
+      padding-right: 20%;
+      color: #f6f6f6;
+      font-family: "Open Sans", sans-serif;
     }
   </style>
 </html>
