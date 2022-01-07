@@ -261,13 +261,7 @@
                 setEditorValue(primaryEditor, data, true);
                 document.getElementById("savebutton").style.display = "none";
               } else {
-                const md = marked.parse(`
-\`\`\`py
-print("hello!")
-\`\`\`
-
-https://test.dev
-                `);
+                const md = marked.parse(data);
                 const el = document.getElementById("editors");
                 el.classList.add("mdv");
                 el.innerHTML = DOMPurify.sanitize(md);
