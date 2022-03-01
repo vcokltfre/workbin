@@ -1,16 +1,7 @@
 const TOKEN_REGEX = /([a-zA-Z0-9_-]{23,28})\.([a-zA-Z0-9_-]{6,7})\.([a-zA-Z0-9_-]{27})/g;
 
-async function createResponse(data: string): Promise<Response> {
-  return new Response(data, {
-    headers: {
-      "Content-Type": "text/plain",
-    },
-  });
-}
-
 async function getPaste(request: Request): Promise<Response> {
   const { searchParams } = new URL(request.url);
-
   const key = searchParams.get("key");
 
   if (!key) {
@@ -27,15 +18,59 @@ async function getPaste(request: Request): Promise<Response> {
     });
   }
 
-  return createResponse(data);
+  let responseData;
+
+  try {
+    responseData = JSON.parse(data);
+  } catch (e) {
+    responseData = {};
+  }
+
+  // Account for old format data
+  if (!responseData.content) {
+    responseData = {
+      content: data,
+      language: "python",
+    };
+  }
+
+  return new Response(JSON.stringify(responseData), {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
 }
 
 async function createPaste(request: Request): Promise<Response> {
-  const data = (await request.text()).replace(TOKEN_REGEX, "[TOKEN REMOVED BY WORKBIN]");
+  let requestData: {
+    content: string;
+    language: string;
+  };
 
+  try {
+    requestData = await request.json();
+  } catch (e) {
+    return new Response(null, {
+      status: 422,
+    });
+  }
+
+  if (!requestData.content) {
+    return new Response(null, {
+      status: 422,
+    });
+  }
+
+  const { content, language } = requestData;
   const key = `${Date.now()}${Math.round(Math.random() * 1000)}`;
 
-  await WORKBIN.put(`paste.${key}`, data);
+  await WORKBIN.put(
+    `paste.${key}`,
+    JSON.stringify({
+      content: content.replace(TOKEN_REGEX, "[TOKEN REMOVED BY WORKBIN]"),
+      language,
+    }),
+  );
 
   return new Response(JSON.stringify({ key }), {
     headers: {

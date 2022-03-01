@@ -4,9 +4,13 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet" />
+
+    <!-- Formatting -->
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.3.4/purify.min.js"
       integrity="sha512-jGh38w63cHRzfBHtyKgEMMkJswUFXDA3YXrDjaE8ptzxV5DDkLDUDjtGUy5tmDkOXHWsItKfFjocaEtj1WuVnQ=="
@@ -19,13 +23,14 @@
     ></script>
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.4.0/styles/atom-one-dark.min.css" />
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.4.0/highlight.min.js"></script>
+
     <title>Workbin</title>
   </head>
   <body>
     <div class="nav">
       <span><a href="https://workbin.dev">Workbin</a></span>
       <div class="fill"></div>
-      <select name="language" id="language" onchange="setLanguage()">
+      <select name="language" id="language" onchange="manager.setLanguage()">
         <option value="python">Python</option>
         <option value="abap">Abap</option>
         <option value="abc">Abc</option>
@@ -206,115 +211,257 @@
       <div class="sep"></div>
       <button onclick="window.location.href = '/'">New</button>
       <div class="sep"></div>
-      <button id="savebutton" onclick="save()">Save</button>
+      <button id="savebutton" onclick="manager.saveEditor()">Save</button>
     </div>
-    <div class="editors" id="editors">
-      <div id="editor" class="primaryEditor"></div>
-      <div id="viewEditor" class="viewEditor nv"></div>
-    </div>
+    <div class="editors" id="editors"></div>
 
     <script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
     <script>
-      window.canSave = true;
+      const API_BASE = "";
 
-      function createEditor(elemId) {
-        var editor = ace.edit(elemId);
-        editor.setTheme("ace/theme/one_dark");
-        editor.session.setMode("ace/mode/python");
-        editor.setShowPrintMargin(false);
-        return editor;
-      }
+      class EditorManager {
+        constructor() {
+          this.primary = null;
+          this.view = null;
+          this.canSave = true;
 
-      const primaryEditor = createEditor("editor");
-      const viewEditor = createEditor("viewEditor");
+          this.primaryDiv = null;
+          this.viewDiv = null;
+          this.mdDiv = null;
+          this.liveMd = false;
 
-      function setDualDisplay() {
-        const primary = document.getElementById("editor");
-        const view = document.getElementById("viewEditor");
+          this.langOverride = null;
 
-        primary.classList.add("hw");
-        view.classList.remove("nv");
-      }
-
-      function setEditorValue(editor, value, readonly) {
-        editor.session.setValue(value);
-        editor.setReadOnly(readonly);
-      }
-
-      function setupPage() {
-        const url = new URL(window.location.href);
-        const id = url.searchParams.get("id");
-        const language = url.searchParams.get("language");
-        const compare = url.searchParams.get("compare");
-        const mdViewer = url.searchParams.get("md");
-
-        if (language) {
-          document.getElementById("language").value = language;
-          setLanguage();
+          this.root = document.getElementById("editors");
         }
 
-        if (id) {
-          window.canSave = false;
-          fetch(`/api/item?key=${id}`)
-            .then(res => res.text())
-            .then(data => {
-              if (!mdViewer) {
-                setEditorValue(primaryEditor, data, true);
-                document.getElementById("savebutton").style.display = "none";
-              } else {
-                const md = marked.parse(data);
-                const el = document.getElementById("editors");
-                el.classList.add("mdv");
-                el.innerHTML = DOMPurify.sanitize(md);
-                hljs.highlightAll();
-              }
-            });
+        #createEditor(id, mode, readonly, value) {
+          const editor = ace.edit(id);
+
+          editor.setTheme("ace/theme/one_dark");
+          editor.session.setMode(mode || "ace/mode/python");
+          editor.setShowPrintMargin(false);
+
+          editor.session.setValue(value);
+          editor.setReadOnly(readonly);
+
+          return editor;
         }
 
-        if (compare && !mdViewer) {
-          fetch(`/api/item?key=${compare}`)
-            .then(res => res.text())
-            .then(data => {
-              setEditorValue(viewEditor, data, true);
-              setDualDisplay();
-            });
+        #createEditorDiv(type) {
+          const div = document.createElement("div");
+
+          div.classList.add(type);
+          div.classList.add("editor");
+          div.id = type;
+
+          this.root.appendChild(div);
+
+          return div;
+        }
+
+        createPrimaryEditor(content) {
+          if (this.primary) {
+            return this.primary;
+          }
+
+          this.primaryDiv = this.#createEditorDiv("primaryEditor");
+
+          this.primary = this.#createEditor("primaryEditor", "ace/mode/python", false, content || "");
+          return this.primary;
+        }
+
+        createViewEditor(content) {
+          if (this.view) {
+            return this.view;
+          }
+
+          this.viewDiv = this.#createEditorDiv("viewEditor");
+
+          this.view = this.#createEditor("viewEditor", "ace/mode/python", true, content || "");
+          return this.view;
+        }
+
+        disableSave() {
+          this.canSave = false;
+        }
+
+        enableSave() {
+          this.canSave = true;
+        }
+
+        setLanguage() {
+          if (this.primary) {
+            this.primary.session.setMode("ace/mode/" + document.getElementById("language").value || "python");
+          }
+
+          if (this.view) {
+            this.view.session.setMode("ace/mode/" + document.getElementById("language").value || "python");
+          }
+        }
+
+        saveEditor() {
+          if (!this.canSave) {
+            return;
+          }
+
+          const data = this.primary.getValue();
+
+          fetch(`${API_BASE}/api/new`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              content: data,
+              language: document.getElementById("language").value || "python",
+            }),
+          }).then(res =>
+            res.json().then(data => {
+              const key = data.key;
+              window.location.href = `?id=${key}`;
+            }),
+          );
+        }
+
+        createMarkdownViewer() {
+          const mdEditor = document.createElement("div");
+          mdEditor.classList.add("mdv");
+          this.root.appendChild(mdEditor);
+
+          this.mdDiv = mdEditor;
+
+          return mdEditor;
+        }
+
+        updateMarkdownViewer(data) {
+          if (!this.mdDiv || !this.liveMd) {
+            return;
+          }
+
+          const md = marked.parse(data);
+
+          this.mdDiv.innerHTML = DOMPurify.sanitize(md);
+          hljs.highlightAll();
+        }
+
+        setMarkdownViewer(id) {
+          fetch(`${API_BASE}/api/item?key=${id}`).then(res =>
+            res.json().then(data => {
+              const mdEditor = createMarkdownViewer();
+              editor.classList.add("mdv-pad");
+
+              this.updateMarkdownViewer(data.content);
+            }),
+          );
+        }
+
+        loadEditor(editorName, id) {
+          let editor;
+
+          if (editorName === "primary") {
+            editor = this.primary;
+          } else {
+            editor = this.view;
+          }
+
+          fetch(`${API_BASE}/api/item?key=${id}`).then(res =>
+            res.json().then(data => {
+              editor.setValue(data.content);
+              const lang = this.langOverride || data.language;
+              editor.session.setMode("ace/mode/" + lang);
+              document.getElementById("language").value = lang;
+            }),
+          );
+        }
+
+        setEditorValue(editor, value) {
+          if (editor === "primary") {
+            this.primary.session.setValue(value);
+          } else if (editor === "view") {
+            this.view.session.setValue(value);
+          }
+        }
+
+        setEditorVisibility(editor, visible) {
+          let editorDiv;
+
+          if (editor === "primary") {
+            editorDiv = this.primaryDiv;
+          } else {
+            editorDiv = this.viewDiv;
+          }
+
+          if (visible) {
+            editorDiv.classList.remove("hidden");
+          } else {
+            editorDiv.classList.add("hidden");
+          }
+        }
+
+        setDualDisplay() {
+          this.createPrimaryEditor();
+          this.createViewEditor();
+
+          this.primaryDiv.classList.add("editor-hl");
+          this.viewDiv.classList.add("editor-hr");
+        }
+
+        setLiveMarkdown() {
+          this.liveMd = true;
+          const elem = this.createMarkdownViewer();
+
+          elem.classList.add("editor-hr");
+          elem.classList.add("editor");
+          elem.classList.add("mdv-live");
+
+          this.primary.commands.on("afterExec", eventData => {
+            if (eventData.command.name === "insertstring") {
+              this.updateMarkdownViewer(this.primary.getValue());
+            }
+          });
         }
       }
 
-      setupPage();
+      const manager = new EditorManager();
 
       document.addEventListener(
         "keydown",
         function (e) {
           if ((window.navigator.platform.match("Mac") ? e.metaKey : e.ctrlKey) && e.keyCode == 83) {
             e.preventDefault();
-            save();
+            manager.saveEditor();
           }
         },
         false,
       );
 
-      function setLanguage() {
-        const elem = document.getElementById("language");
-        primaryEditor.session.setMode("ace/mode/" + elem.value);
+      // Page setup
+      const url = new URL(window.location.href);
+      const id = url.searchParams.get("id");
+      const md = url.searchParams.get("md");
+      const compare = url.searchParams.get("compare");
+      const language = url.searchParams.get("language");
+
+      if (language) {
+        manager.langOverride = language;
       }
 
-      function save() {
-        if (!window.canSave) {
-          return;
-        }
-
-        const val = primaryEditor.getValue();
-
-        fetch("/api/new", {
-          method: "POST",
-          body: val,
-        }).then(res =>
-          res.json().then(data => {
-            const key = data.key;
-            window.location.href = `/?id=${key}&language=${document.getElementById("language").value}`;
-          }),
-        );
+      if (id && !md && !compare) {
+        manager.createViewEditor();
+        manager.loadEditor("view", id);
+      } else if (id && compare && !md) {
+        manager.setDualDisplay();
+        manager.loadEditor("primary", id);
+        manager.loadEditor("view", compare);
+      } else if (md === "true") {
+        manager.setMarkdownViewer(id);
+      } else if (md === "editor") {
+        manager.createPrimaryEditor();
+        manager.setLiveMarkdown();
+        manager.primaryDiv.classList.add("editor-hl");
+      } else {
+        manager.createPrimaryEditor();
       }
     </script>
   </body>
@@ -324,6 +471,7 @@
     html {
       margin: 0;
       background-color: #282c34;
+      overflow: hidden;
     }
 
     a {
@@ -363,7 +511,7 @@
       width: 0.5rem;
     }
 
-    .primaryEditor {
+    .editor {
       position: absolute;
       top: 2.25rem;
       right: 0;
@@ -371,33 +519,39 @@
       left: 0;
     }
 
-    .hw {
+    .editor-hl {
       width: 50%;
+      border-right: 2px solid #575e6b;
     }
 
-    .viewEditor {
-      position: absolute;
-      top: 2.25rem;
-      right: 50%;
-      bottom: 0;
-      left: 50%;
-      width: calc(50% - 0.25rem);
-      border-left: 0.25rem solid #575e6b;
+    .editor-hr {
+      width: 50%;
+      left: calc(50% + 2px);
     }
 
-    .nv {
+    .hidden {
       display: none;
     }
 
+    /* Markdown viewer */
     .mdv {
-      padding-left: 20%;
-      padding-right: 20%;
       color: #f6f6f6;
       font-family: "Open Sans", sans-serif;
     }
 
+    .mdv-live {
+      width: calc(50% - 2rem);
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+
+    .mdv-pad {
+      padding-left: 20%;
+      padding-right: 20%;
+    }
+
     @media only screen and (max-width: 768px) {
-      .mdv {
+      .mdv-pad {
         padding-left: 3%;
         padding-right: 3%;
       }
