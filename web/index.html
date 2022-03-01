@@ -348,7 +348,7 @@
         setMarkdownViewer(id) {
           fetch(`${API_BASE}/api/item?key=${id}`).then(res =>
             res.json().then(data => {
-              const mdEditor = createMarkdownViewer();
+              const mdEditor = this.createMarkdownViewer();
               editor.classList.add("mdv-pad");
 
               this.updateMarkdownViewer(data.content);
