@@ -371,6 +371,8 @@
               const lang = this.langOverride || data.language;
               editor.session.setMode("ace/mode/" + lang);
               document.getElementById("language").value = lang;
+
+              editor.selection.moveCursorFileStart();
             }),
           );
         }
