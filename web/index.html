@@ -462,6 +462,9 @@
         manager.createPrimaryEditor();
         manager.setLiveMarkdown();
         manager.primaryDiv.classList.add("editor-hl");
+
+        document.getElementById("language").value = "markdown";
+        manager.setLanguage();
       } else {
         manager.createPrimaryEditor();
       }
