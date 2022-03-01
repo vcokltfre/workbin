@@ -47,11 +47,11 @@ async function createPaste(request: Request): Promise<Response> {
     language: string;
   };
 
-  try {
-    requestData = await request.json();
-  } catch (e) {
-    const data = await request.text();
+  const data = await request.text();
 
+  try {
+    requestData = JSON.parse(data);
+  } catch (e) {
     requestData = {
       content: data,
       language: "python",
