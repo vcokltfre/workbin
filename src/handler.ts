@@ -50,9 +50,15 @@ async function createPaste(request: Request): Promise<Response> {
   try {
     requestData = await request.json();
   } catch (e) {
-    return new Response(null, {
+    const data = await request.text();
+
+    requestData = {
+      content: data,
+      language: "python",
+    };
+    /* return new Response(null, {
       status: 422,
-    });
+    }); */ // This will be re-added after a week
   }
 
   if (!requestData.content) {
@@ -68,7 +74,7 @@ async function createPaste(request: Request): Promise<Response> {
     `paste.${key}`,
     JSON.stringify({
       content: content.replace(TOKEN_REGEX, "[TOKEN REMOVED BY WORKBIN]"),
-      language,
+      language: language || "python",
     }),
   );
 
