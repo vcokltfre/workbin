@@ -418,9 +418,7 @@
           elem.classList.add("mdv-live");
 
           this.primary.commands.on("afterExec", eventData => {
-            if (eventData.command.name === "insertstring") {
-              this.updateMarkdownViewer(this.primary.getValue());
-            }
+            this.updateMarkdownViewer(this.primary.getValue());
           });
         }
       }
