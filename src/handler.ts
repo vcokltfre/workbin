@@ -1,5 +1,9 @@
 const TOKEN_REGEX = /([a-zA-Z0-9_-]{23,28})\.([a-zA-Z0-9_-]{6,7})\.([a-zA-Z0-9_-]{27})/g;
 
+type UUID = {
+  uuid: string;
+};
+
 async function getPaste(request: Request): Promise<Response> {
   const { searchParams } = new URL(request.url);
   const key = searchParams.get("key");
@@ -45,6 +49,7 @@ async function createPaste(request: Request): Promise<Response> {
   let requestData: {
     content: string;
     language: string;
+    secure?: boolean;
   };
 
   const data = await request.text();
@@ -55,6 +60,7 @@ async function createPaste(request: Request): Promise<Response> {
     requestData = {
       content: data,
       language: "python",
+      secure: false,
     };
     /* return new Response(null, {
       status: 422,
@@ -68,7 +74,16 @@ async function createPaste(request: Request): Promise<Response> {
   }
 
   const { content, language } = requestData;
-  const key = `${Date.now()}${Math.round(Math.random() * 1000)}`;
+  let key: string;
+
+  if (requestData.secure) {
+    const resp = await fetch("https://uuid.rocks/json");
+    const uuid: UUID = await resp.json();
+
+    key = `${uuid.uuid}`;
+  } else {
+    key = `${Date.now()}${Math.round(Math.random() * 1000)}`;
+  }
 
   await WORKBIN.put(
     `paste.${key}`,
