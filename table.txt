@@ -1,0 +1,9 @@
+
+| Resource                                                      | Description                                               |
+|---------------------------------------------------------------|-----------------------------------------------------------|
+| [asyncpg docs](https://magicstack.github.io/asyncpg/current/) | The official asyncpg documentation                        |
+| [aiomysql docs](https://aiomysql.readthedocs.io/)             | The official aiomysql documentation                       |
+| [aiosqlite docs](https://readthedocs.org/projects/aiosqlite/) | The official aiosqlite documentation.                     |
+| [motor docs](https://motor.readthedocs.io/en/stable/)         | The official motor documentation                          |
+| [PostgreSQL tutorial](https://www.postgresqltutorial.com/)    | A tutorial to help you learn how to use Postgres          |
+| [MySQL tutorial](https://www.mysqltutorial.org/)              | A tutorial to help you learn how to use MySQL and MariaDB |
