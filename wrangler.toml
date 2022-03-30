@@ -1,8 +1,8 @@
 name = "workbin"
 type = "javascript"
-zone_id = "c050372f730b13fa7a7e4c0da3079a4b"
+zone_id = "2950df0cc42f22e95514bfcf4a33882a"
 account_id = "c8526a45c47706d6c69f8d997004bd7a"
-route = "nextcord.dev/*"
+route = "workbin.dev/*"
 compatibility_date = "2021-12-19"
 kv_namespaces = [
     { binding = "WORKBIN", id = "a20fc5453a25469282397e99003e2f9b", preview_id = "a20fc5453a25469282397e99003e2f9b" },
