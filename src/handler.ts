@@ -101,13 +101,17 @@ async function createPaste(request: Request): Promise<Response> {
 }
 
 export async function handleRequest(request: Request): Promise<Response> {
-  const { pathname } = new URL(request.url);
+  const { pathname, searchParams } = new URL(request.url);
 
   switch (pathname) {
     case "/api/item":
       return getPaste(request);
     case "/api/new":
       return createPaste(request);
+  }
+
+  if (searchParams.has("id") && request.headers.get("User-Agent")?.toLowerCase().includes("discord")) {
+    return new Response(null, { status: 401 });
   }
 
   return fetch(request);

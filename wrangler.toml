@@ -1,6 +1,4 @@
 name = "workbin"
-type = "javascript"
-zone_id = "2950df0cc42f22e95514bfcf4a33882a"
 account_id = "c8526a45c47706d6c69f8d997004bd7a"
 route = "workbin.dev/*"
 compatibility_date = "2021-12-19"
@@ -10,5 +8,3 @@ kv_namespaces = [
 
 [build]
 command = "npm install && npm run build"
-[build.upload]
-format = "service-worker"
