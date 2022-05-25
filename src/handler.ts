@@ -57,14 +57,9 @@ async function createPaste(request: Request): Promise<Response> {
   try {
     requestData = JSON.parse(data);
   } catch (e) {
-    requestData = {
-      content: data,
-      language: "python",
-      secure: false,
-    };
-    /* return new Response(null, {
+    return new Response(null, {
       status: 422,
-    }); */ // This will be re-added after a week
+    });
   }
 
   if (!requestData.content) {
