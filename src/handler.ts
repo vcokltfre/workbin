@@ -1,4 +1,4 @@
-const TOKEN_REGEX = /([a-zA-Z0-9_-]{23,28})\.([a-zA-Z0-9_-]{6,7})\.([a-zA-Z0-9_-]{27})/g;
+const TOKEN_REGEX = /([a-zA-Z0-9_-]{23,28})\.([a-zA-Z0-9_-]{6,7})\.([a-zA-Z0-9_-]{27,})/g;
 
 type UUID = {
   uuid: string;
