@@ -1,7 +1,17 @@
+import { Mystbin } from "./providers";
+
 const TOKEN_REGEX = /([a-zA-Z0-9_-]{23,28})\.([a-zA-Z0-9_-]{6,7})\.([a-zA-Z0-9_-]{27,})/g;
 
 type UUID = {
   uuid: string;
+};
+
+type Provider = {
+  (key: string): Promise<Response>;
+};
+
+const providers: { [name: string]: Provider } = {
+  mystbin: Mystbin,
 };
 
 async function getPaste(request: Request): Promise<Response> {
@@ -95,6 +105,27 @@ async function createPaste(request: Request): Promise<Response> {
   });
 }
 
+async function proxy(request: Request): Promise<Response> {
+  const { searchParams } = new URL(request.url);
+
+  const key = searchParams.get("key");
+  const provider = searchParams.get("provider");
+
+  if (!key || !provider) {
+    return new Response(null, {
+      status: 400,
+    });
+  }
+
+  if (!providers[provider]) {
+    return new Response(null, {
+      status: 404,
+    });
+  }
+
+  return await providers[provider](key);
+}
+
 export async function handleRequest(request: Request): Promise<Response> {
   const { pathname, searchParams } = new URL(request.url);
 
@@ -103,6 +134,8 @@ export async function handleRequest(request: Request): Promise<Response> {
       return getPaste(request);
     case "/api/new":
       return createPaste(request);
+    case "/api/proxy":
+      return proxy(request);
   }
 
   if (searchParams.has("id") && request.headers.get("User-Agent")?.toLowerCase().includes("discord")) {

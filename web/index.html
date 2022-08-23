@@ -223,6 +223,14 @@
     <script>
       const API_BASE = "";
 
+      // Page setup
+      const url = new URL(window.location.href);
+      const id = url.searchParams.get("id");
+      const md = url.searchParams.get("md");
+      const compare = url.searchParams.get("compare");
+      const language = url.searchParams.get("language");
+      const proxy = url.searchParams.get("proxy");
+
       class EditorManager {
         constructor() {
           this.primary = null;
@@ -369,7 +377,15 @@
             editor = this.view;
           }
 
-          fetch(`${API_BASE}/api/item?key=${id}`).then(res =>
+          let endpoint = "";
+
+          if (proxy) {
+            endpoint = `${API_BASE}/api/proxy?key=${id}&provider=${proxy}`;
+          } else {
+            endpoint = `${API_BASE}/api/item?key=${id}`;
+          }
+
+          fetch(endpoint).then(res =>
             res.json().then(data => {
               editor.setValue(data.content);
               const lang = this.langOverride || data.language;
@@ -439,13 +455,6 @@
         },
         false,
       );
-
-      // Page setup
-      const url = new URL(window.location.href);
-      const id = url.searchParams.get("id");
-      const md = url.searchParams.get("md");
-      const compare = url.searchParams.get("compare");
-      const language = url.searchParams.get("language");
 
       if (language) {
         manager.langOverride = language;
